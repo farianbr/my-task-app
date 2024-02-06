@@ -4,6 +4,7 @@ import "./globals.css";
 import Sidebar from "./components/Sidebar/Sidebar";
 import GlobalStyleProvider from "./providers/GlobalStyleProvider";
 import ContextProvider from "./providers/ContextProvider";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,6 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    <ClerkProvider>
     <html lang="en">
       <head>
         <link
@@ -32,10 +34,11 @@ export default function RootLayout({
         <ContextProvider>
           <GlobalStyleProvider>
             <Sidebar></Sidebar>
-            {children}
+            <div className="w-full">{children}</div>
           </GlobalStyleProvider>
         </ContextProvider>
       </body>
     </html>
+    </ClerkProvider>
   );
 }
