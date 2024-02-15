@@ -8,13 +8,20 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Button from "../Button/Button";
 import { logout } from "@/app/utils/Icons";
-import { useClerk } from "@clerk/nextjs";
+import { UserButton, useClerk, useUser } from "@clerk/nextjs";
 
 const Sidebar = () => {
   const { theme } = useGlobalState();
-  const {signOut} = useClerk()
+  const { signOut } = useClerk();
   const router = useRouter();
   const pathname = usePathname();
+
+  const { user } = useUser();
+  const { firstName, lastName, imageUrl } = user || {
+    firstName: "",
+    lastName: "",
+    imageUrl: "",
+  };
 
   console.log(pathname, router);
 
@@ -30,13 +37,16 @@ const Sidebar = () => {
           <Image
             width={70}
             height={70}
-            src="/avatar1.jpg"
+            src={imageUrl}
             alt="profile"
           ></Image>
         </div>
-        <h1>
-          <span>Farian</span>
-          <span>Bin Rahman</span>
+        <div className="user-button w-full h-full absolute z-20 top-0 opacity-0">
+          <UserButton></UserButton>
+        </div>
+        <h1 className="capitalize">
+          <span>{firstName}</span>
+          <span>{lastName}</span>
         </h1>
       </div>
       <ul className="nav-items">
@@ -67,7 +77,7 @@ const Sidebar = () => {
             signOut(() => router.push("/signin"));
           }}
         />
-      </div> 
+      </div>
     </SidebarStyled>
   );
 };
@@ -83,6 +93,21 @@ const SidebarStyled = styled.nav`
   flex-direction: column;
   justify-content: space-between;
   color: ${(props) => props.theme.colorGrey2};
+
+  .user-button {
+    .cl-rootBox {
+      width: 100%;
+      height: 100%;
+      .cl-userButtonBox {
+        width: 100%;
+        height: 100%;
+        .cl-userButtonTrigger {
+          width: 100%;
+          height: 100%;
+        }
+      }
+    }
+  }
 
   .profile {
     margin: 1rem;
@@ -151,7 +176,7 @@ const SidebarStyled = styled.nav`
 
   .nav-item {
     position: relative;
-    padding: 0.8rem 1rem .8rem 2.1rem;
+    padding: 0.8rem 1rem 0.8rem 2.1rem;
     margin: 0.3rem 0;
     display: grid;
     grid-template-columns: 40px 1fr;
@@ -200,7 +225,7 @@ const SidebarStyled = styled.nav`
       &::after {
         width: 100%;
       }
-    }    
+    }
   }
   .active {
     background-color: ${(props) => props.theme.activeNavLink};
