@@ -47,6 +47,10 @@ export const GlobalProvider = ({ children }) => {
     }
   }, [user]);
 
+  const completedTasks = tasks.filter(task => task.isCompleted === true)
+  const importantTasks = tasks.filter(task => task.important === true)
+  const incompleteTasks = tasks.filter(task => task.isCompleted === false)
+
   return (
     <GlobalContext.Provider
       value={{
@@ -55,6 +59,9 @@ export const GlobalProvider = ({ children }) => {
         deleteTask,
         isLoading,
         allTasks,
+        completedTasks,
+        importantTasks,
+        incompleteTasks
       }}
     >
       <GlobalUpdateContext.Provider value={{}}>
