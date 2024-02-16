@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Button from "../Button/Button";
 
-import { add, plus } from "@/app/utils/Icons";
+import { add, close } from "@/app/utils/Icons";
 import styled from "styled-components";
 import { useGlobalState } from "@/app/context/globalProviders";
 import axios from "axios";
@@ -61,7 +61,7 @@ const CreateContent = () => {
       if (!res.data.error) {
         toast.success("Task created successfully.");
         allTasks();
-        closeModal();
+        closeModal()
       }
     } catch (error) {
       toast.error("Something went wrong.");
@@ -71,7 +71,16 @@ const CreateContent = () => {
 
   return (
     <CreateContentStyled onSubmit={handleSubmit} theme={theme}>
-      <h1>Create a Task</h1>
+      <h1 className="flex flex-row justify-between">
+      Create a Task{" "}
+        <button
+          onClick={() => closeModal()}
+          type="button"
+          className="close-btn py-1 px-4 rounded-md"
+        >
+          {close}
+        </button>
+      </h1>
       <div className="input-control">
         <label htmlFor="title">Title</label>
         <input
@@ -95,7 +104,7 @@ const CreateContent = () => {
         ></textarea>
       </div>
       <div className="input-control">
-        <label htmlFor="date">Date</label>
+        <label htmlFor="date">Deadline</label>
         <input
           value={date}
           onChange={handleChange("date")}
@@ -142,6 +151,24 @@ const CreateContent = () => {
 };
 
 const CreateContentStyled = styled.form`
+position: relative;
+  padding: 2rem;
+  width: 100%;
+  background-color: ${(props) => props.theme.colorBg2};
+  border: 2px solid ${(props) => props.theme.borderColor2};
+  border-radius: 1rem;
+  height: 100%;
+  overflow-y: auto;
+
+  .close-btn:hover {
+    transition: all 0.3s ease;
+    background-color: ${(props) => props.theme.colorGrey5};
+    color: ${(props) => props.theme.colorGrey0};
+  }
+
+  &::-webkit-scrollbar {
+    width: 0.5rem;
+  }
   > h1 {
     font-size: clamp(1.2rem, 5vw, 1.6rem);
     font-weight: 600;

@@ -7,11 +7,11 @@ import menu from "@/app/utils/menu";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Button from "../Button/Button";
-import { logout } from "@/app/utils/Icons";
+import { arrowLeft, bars, logout } from "@/app/utils/Icons";
 import { UserButton, useClerk, useUser } from "@clerk/nextjs";
 
 const Sidebar = () => {
-  const { theme } = useGlobalState();
+  const { theme, collapsed, collapseMenu } = useGlobalState();
   const { signOut } = useClerk();
   const router = useRouter();
   const pathname = usePathname();
@@ -23,23 +23,19 @@ const Sidebar = () => {
     imageUrl: "",
   };
 
-  console.log(pathname, router);
-
   const handleClick = (link: string) => {
     router.push(link);
   };
 
   return (
-    <SidebarStyled theme={theme}>
+    <SidebarStyled theme={theme} collapsed={collapsed}>
+      <button className="toggle-nav" onClick={collapseMenu}>
+        {collapsed ? bars : arrowLeft}
+      </button>
       <div className="profile">
         <div className="profile-overlay"></div>
         <div className="image">
-          <Image
-            width={70}
-            height={70}
-            src={imageUrl}
-            alt="profile"
-          ></Image>
+          <Image width={70} height={70} src={imageUrl} alt="profile"></Image>
         </div>
         <div className="user-button w-full h-full absolute z-20 top-0 opacity-0">
           <UserButton></UserButton>
@@ -53,6 +49,7 @@ const Sidebar = () => {
         {menu.map((item) => {
           return (
             <li
+              key={item.id}
               className={`nav-item ${pathname === item.link ? "active" : ""}`}
               onClick={() => {
                 handleClick(item.link);
@@ -82,7 +79,7 @@ const Sidebar = () => {
   );
 };
 
-const SidebarStyled = styled.nav`
+const SidebarStyled = styled.nav<{ collapsed: boolean}>`
   position: relative;
   width: ${(props) => props.theme.sidebarWidth};
   background-color: ${(props) => props.theme.colorBg2};
@@ -93,6 +90,36 @@ const SidebarStyled = styled.nav`
   flex-direction: column;
   justify-content: space-between;
   color: ${(props) => props.theme.colorGrey2};
+
+  @media screen and (max-width: 768px) {
+    position: fixed;
+    height: calc(100vh - 2rem);
+    z-index: 100;
+
+    transition: all 0.3s cubic-bezier(0.53, 0.21, 0, 1);
+    transform: ${(props) =>
+      props.collapsed ? "translateX(-107%)" : "translateX(0)"};
+
+    .toggle-nav {
+      display: block !important;
+    }
+  }
+
+  .toggle-nav {
+    display: none;
+    padding: 0.8rem 0.9rem;
+    position: absolute;
+    right: -69px;
+    top: 1.8rem;
+
+    border-top-right-radius: 1rem;
+    border-bottom-right-radius: 1rem;
+
+    background-color: ${(props) => props.theme.colorBg2};
+    border-right: 2px solid ${(props) => props.theme.borderColor2};
+    border-top: 2px solid ${(props) => props.theme.borderColor2};
+    border-bottom: 2px solid ${(props) => props.theme.borderColor2};
+  }
 
   .user-button {
     .cl-rootBox {

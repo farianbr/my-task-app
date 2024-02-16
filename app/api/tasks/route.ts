@@ -4,10 +4,10 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const {userId} = auth()
+    const { userId } = auth();
 
-    if(!userId){
-        return NextResponse.json({ error: "UNAUTHORIZED", status: 401 })
+    if (!userId) {
+      return NextResponse.json({ error: "UNAUTHORIZED", status: 401 });
     }
 
     const { title, description, date, completed, important } = await req.json();
@@ -27,18 +27,17 @@ export async function POST(req: Request) {
     }
 
     const task = await prisma.task.create({
-        data: {
-          title,
-          description,
-          date,
-          isCompleted: completed,
-          isImportant: important,
-          userId,
-        },
-      });
-  
-      return NextResponse.json(task);
+      data: {
+        title,
+        description,
+        date,
+        isCompleted: completed,
+        isImportant: important,
+        userId,
+      },
+    });
 
+    return NextResponse.json(task);
   } catch (error) {
     console.log("ERROR CREATING TASK: ", error);
     return NextResponse.json({ error: "ERROR CREATING TASK", status: 500 });
@@ -47,7 +46,6 @@ export async function POST(req: Request) {
 
 export async function GET(req: Request) {
   try {
-
     const { userId } = auth();
 
     if (!userId) {
@@ -61,7 +59,6 @@ export async function GET(req: Request) {
     });
 
     return NextResponse.json(tasks);
-
   } catch (error) {
     console.log("ERROR GETTING TASK: ", error);
     return NextResponse.json({ error: "ERROR GETTING TASK", status: 500 });
@@ -70,22 +67,25 @@ export async function GET(req: Request) {
 
 export async function PUT(req: Request) {
   try {
+    const { userId } = auth();
 
+    if (!userId) {
+      return NextResponse.json({ error: "UNAUTHORIZED", status: 401 });
+    }
 
+    const { id, isCompleted } = await req.json();
 
+    const res = await prisma.task.update({
+      where: {
+        id,
+      },
+      data: {
+        isCompleted,
+      },
+    });
+    return NextResponse.json(res);
   } catch (error) {
     console.log("ERROR UPDATING TASK: ", error);
     return NextResponse.json({ error: "ERROR UPDATING TASK", status: 500 });
-  }
-}
-
-export async function DELETE(req: Request) {
-  try {
-
-
-
-  } catch (error) {
-    console.log("ERROR DELETING TASK: ", error);
-    return NextResponse.json({ error: "ERROR DELETING TASK", status: 500 });
   }
 }

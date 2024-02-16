@@ -15,14 +15,40 @@ export const GlobalProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useUser();
   const [tasks, setTasks] = useState([]);
+  const [modal, setModal] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const [updateModal, setUpdateModal] = useState(false);
+  const [updateId, setUpdateId] = useState("");
   const theme = themes[selectedTheme];
+
+  const openUpdateModal = () => {
+    setUpdateModal(true);
+  };
+
+  const openModal = () => {
+    setModal(true);
+  };
+
+  const closeModal = () => {
+    setModal(false);
+    setUpdateModal(false);
+  };
+
+  const collapseMenu = () => {
+    setCollapsed(!collapsed);
+  };
 
   const allTasks = async () => {
     setIsLoading(true);
 
     try {
       const res = await axios.get("/api/tasks");
-      setTasks(res.data);
+      const sorted = res.data.sort((a, b) => {
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      });
+      setTasks(sorted);
       setIsLoading(false);
     } catch (error) {
       console.log(error);
@@ -31,9 +57,31 @@ export const GlobalProvider = ({ children }) => {
 
   const deleteTask = async (id) => {
     try {
-      const res = await axios.delete(`/api/tasks/${id}`);
+      await axios.delete(`/api/tasks/${id}`);
       toast.success("Task deleted");
 
+      allTasks();
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong");
+    }
+  };
+
+  const updateTask = async (task) => {
+    try {
+      await axios.put("/api/tasks", task);
+      toast.success("Task updated");
+      allTasks();
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong");
+    }
+  };
+
+  const updateContent = async (id, task) => {
+    try {
+      await axios.put(`/api/tasks/${id}`, task);
+      toast.success("Task updated");
       allTasks();
     } catch (error) {
       console.log(error);
@@ -47,9 +95,9 @@ export const GlobalProvider = ({ children }) => {
     }
   }, [user]);
 
-  const completedTasks = tasks.filter(task => task.isCompleted === true)
-  const importantTasks = tasks.filter(task => task.important === true)
-  const incompleteTasks = tasks.filter(task => task.isCompleted === false)
+  const completedTasks = tasks.filter((task) => task.isCompleted === true);
+  const importantTasks = tasks.filter((task) => task.isImportant === true);
+  const incompleteTasks = tasks.filter((task) => task.isCompleted === false);
 
   return (
     <GlobalContext.Provider
@@ -61,7 +109,18 @@ export const GlobalProvider = ({ children }) => {
         allTasks,
         completedTasks,
         importantTasks,
-        incompleteTasks
+        incompleteTasks,
+        updateTask,
+        modal,
+        openModal,
+        closeModal,
+        collapsed,
+        collapseMenu,
+        updateContent,
+        openUpdateModal,
+        updateModal,
+        updateId,
+        setUpdateId,
       }}
     >
       <GlobalUpdateContext.Provider value={{}}>

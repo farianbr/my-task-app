@@ -4,6 +4,7 @@ import { edit, trash } from "@/app/utils/Icons";
 import React from "react";
 import styled from "styled-components";
 import formatDate from "@/app/utils/formatDate";
+import { useRouter } from "next/navigation";
 
 interface Props {
   title: string;
@@ -14,7 +15,15 @@ interface Props {
 }
 
 function TaskItem({ title, description, date, isCompleted, id }: Props) {
-  const { theme, deleteTask, updateTask } = useGlobalState();
+  const { theme, deleteTask, updateTask, openUpdateModal, setUpdateId } =
+    useGlobalState();
+  const router = useRouter();
+
+  const handleUpdateContent = (id: string) => {
+    setUpdateId(id);
+    openUpdateModal();
+  };
+
   return (
     <TaskItemStyled theme={theme}>
       <h1>{title}</h1>
@@ -50,7 +59,14 @@ function TaskItem({ title, description, date, isCompleted, id }: Props) {
             Incomplete
           </button>
         )}
-        <button className="edit">{edit}</button>
+        <button
+          className="edit"
+          onClick={() => {
+            router.push(`/update-task/id?key=${id}`);
+          }}
+        >
+          {edit}
+        </button>
         <button
           className="delete"
           onClick={() => {
