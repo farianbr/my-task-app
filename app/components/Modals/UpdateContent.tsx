@@ -1,22 +1,41 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Button from "../Button/Button";
 
-import { add, close } from "@/app/utils/Icons";
+import { close, edit } from "@/app/utils/Icons";
 import styled from "styled-components";
 import { useGlobalState } from "@/app/context/globalProviders";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
-const CreateContent = () => {
+const UpdateContent = ({ id }: any) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
   const [completed, setCompleted] = useState(false);
   const [important, setImportant] = useState(false);
+  const router = useRouter();
+  const { theme, allTasks } = useGlobalState();
 
-  const { theme, allTasks, closeModal } = useGlobalState();
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await axios.get(`/api/tasks/${id}`);
+        const { title, description, date, isCompleted, isImportant } = res.data;
+
+        setTitle(title);
+        setDescription(description);
+        setDate(date);
+        setCompleted(isCompleted);
+        setImportant(isImportant);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    fetchData();
+  }, []);
 
   const handleChange = (name: string) => (e: any) => {
     switch (name) {
@@ -52,35 +71,29 @@ const CreateContent = () => {
     };
 
     try {
-      const res = await axios.post("/api/tasks", task);
-
-      if (res.data.error) {
-        toast.error(res.data.error);
-      }
-
-      if (!res.data.error) {
-        toast.success("Task created successfully.");
-        allTasks();
-        closeModal()
-      }
+      await axios.put(`/api/tasks/${id}`, task);
+      toast.success("Task updated");
+      allTasks();
+      router.push("/");
     } catch (error) {
-      toast.error("Something went wrong.");
       console.log(error);
+      toast.error("Something went wrong");
     }
   };
 
   return (
-    <CreateContentStyled onSubmit={handleSubmit} theme={theme}>
+    <UpdateContentStyled onSubmit={handleSubmit} theme={theme}>
       <h1 className="flex flex-row justify-between">
-      Create a Task{" "}
+        Update a Task{" "}
         <button
-          onClick={() => closeModal()}
+          onClick={() => router.push("/")}
           type="button"
           className="close-btn py-1 px-4 rounded-md"
         >
           {close}
         </button>
       </h1>
+
       <div className="input-control">
         <label htmlFor="title">Title</label>
         <input
@@ -89,7 +102,7 @@ const CreateContent = () => {
           value={title}
           name="title"
           onChange={handleChange("title")}
-          placeholder="e.g, Watch a video from Fireship."
+          placeholder="..."
         />
       </div>
       <div className="input-control">
@@ -100,7 +113,7 @@ const CreateContent = () => {
           name="description"
           id="description"
           rows={4}
-          placeholder="e.g, Watch a video about Next.js Auth"
+          placeholder="..."
         ></textarea>
       </div>
       <div className="input-control">
@@ -121,6 +134,7 @@ const CreateContent = () => {
           type="checkbox"
           name="completed"
           id="completed"
+          checked={completed}
         />
       </div>
       <div className="input-control toggler">
@@ -131,14 +145,15 @@ const CreateContent = () => {
           type="checkbox"
           name="important"
           id="important"
+          checked={important}
         />
       </div>
 
       <div className="submit-btn flex justify-end">
         <Button
           type="submit"
-          name="Create Task"
-          icon={add}
+          name="Update Task"
+          icon={edit}
           padding={"0.8rem 2rem"}
           borderRad={"0.8rem"}
           fw={"500"}
@@ -146,12 +161,12 @@ const CreateContent = () => {
           background={"rgb(0, 163, 255)"}
         />
       </div>
-    </CreateContentStyled>
+    </UpdateContentStyled>
   );
 };
 
-const CreateContentStyled = styled.form`
-position: relative;
+const UpdateContentStyled = styled.form`
+  position: relative;
   padding: 2rem;
   width: 100%;
   background-color: ${(props) => props.theme.colorBg2};
@@ -247,4 +262,4 @@ position: relative;
   }
 `;
 
-export default CreateContent;
+export default UpdateContent;
