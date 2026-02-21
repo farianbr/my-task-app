@@ -15,6 +15,7 @@ const CreateContent = () => {
   const [date, setDate] = useState("");
   const [completed, setCompleted] = useState(false);
   const [important, setImportant] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { theme, allTasks, closeModal } = useGlobalState();
 
@@ -42,6 +43,7 @@ const CreateContent = () => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    setIsLoading(true);
 
     const task = {
       title,
@@ -56,16 +58,19 @@ const CreateContent = () => {
 
       if (res.data.error) {
         toast.error(res.data.error);
+        setIsLoading(false);
       }
 
       if (!res.data.error) {
         toast.success("Task created successfully.");
         allTasks();
-        closeModal()
+        closeModal();
+        setIsLoading(false);
       }
     } catch (error) {
       toast.error("Something went wrong.");
       console.log(error);
+      setIsLoading(false);
     }
   };
 
@@ -138,12 +143,13 @@ const CreateContent = () => {
         <Button
           type="submit"
           name="Create Task"
-          icon={add}
+          icon={!isLoading && add}
           padding={"0.8rem 2rem"}
           borderRad={"0.8rem"}
           fw={"500"}
           fs={"1.2rem"}
           background={"rgb(0, 163, 255)"}
+          isLoading={isLoading}
         />
       </div>
     </CreateContentStyled>

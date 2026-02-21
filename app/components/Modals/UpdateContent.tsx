@@ -16,6 +16,7 @@ const UpdateContent = ({ id }: any) => {
   const [date, setDate] = useState("");
   const [completed, setCompleted] = useState(false);
   const [important, setImportant] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { theme, allTasks } = useGlobalState();
 
@@ -61,6 +62,7 @@ const UpdateContent = ({ id }: any) => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    setIsLoading(true);
 
     const task = {
       title,
@@ -74,10 +76,12 @@ const UpdateContent = ({ id }: any) => {
       await axios.put(`/api/tasks/${id}`, task);
       toast.success("Task updated");
       allTasks();
+      setIsLoading(false);
       router.push("/");
     } catch (error) {
       console.log(error);
       toast.error("Something went wrong");
+      setIsLoading(false);
     }
   };
 
@@ -153,12 +157,13 @@ const UpdateContent = ({ id }: any) => {
         <Button
           type="submit"
           name="Update Task"
-          icon={edit}
+          icon={!isLoading && edit}
           padding={"0.8rem 2rem"}
           borderRad={"0.8rem"}
           fw={"500"}
           fs={"1.2rem"}
           background={"rgb(0, 163, 255)"}
+          isLoading={isLoading}
         />
       </div>
     </UpdateContentStyled>

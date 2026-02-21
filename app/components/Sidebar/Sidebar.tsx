@@ -9,6 +9,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Button from "../Button/Button";
 import { arrowLeft, bars, logout } from "@/app/utils/Icons";
 import { UserButton, useClerk, useUser } from "@clerk/nextjs";
+import { useState } from "react";
 
 const Sidebar = () => {
   const { theme, collapsed, collapseMenu } = useGlobalState();
@@ -23,22 +24,29 @@ const Sidebar = () => {
     imageUrl: "",
   };
 
-  const handleClick = (link: string) => {
-    router.push(link);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      signOut(() => router.push("/signin"));
+    } catch (error) {
+      setIsSigningOut(false);
+    }
   };
 
   return (
-    <SidebarStyled theme={theme} collapsed={collapsed}>
+    <SidebarStyled theme={theme} $collapsed={collapsed}>
       <button className="toggle-nav" onClick={collapseMenu}>
         {collapsed ? bars : arrowLeft}
       </button>
       <div className="profile">
         <div className="profile-overlay"></div>
-        <div className="image">
-          <Image width={70} height={70} src={imageUrl} alt="profile"></Image>
-        </div>
-        <div className="user-button w-full h-full absolute z-20 top-0 opacity-0">
+        <div className="user-button">
           <UserButton></UserButton>
+        </div>
+        <div className="image">
+          <Image width={70} height={70} src={imageUrl || "/avatar1.jpg"} alt="profile"></Image>
         </div>
         <h1 className="capitalize">
           <span>{firstName}</span>
@@ -51,9 +59,7 @@ const Sidebar = () => {
             <li
               key={item.id}
               className={`nav-item ${pathname === item.link ? "active" : ""}`}
-              onClick={() => {
-                handleClick(item.link);
-              }}
+              
             >
               {item.icon}
               <Link href={item.link}>{item.title}</Link>
@@ -63,23 +69,22 @@ const Sidebar = () => {
       </ul>
       <div className="sign-out relative m-6">
         <Button
-          name={"Sign Out"}
+          name={isSigningOut ? "Signing Out..." : "Sign Out"}
           type={"submit"}
           padding={"0.4rem 0.8rem"}
           borderRad={"0.8rem"}
           fw={"500"}
           fs={"1.2rem"}
-          icon={logout}
-          click={() => {
-            signOut(() => router.push("/signin"));
-          }}
+          icon={!isSigningOut && logout}
+          isLoading={isSigningOut}
+          click={handleSignOut}
         />
       </div>
     </SidebarStyled>
   );
 };
 
-const SidebarStyled = styled.nav<{ collapsed: boolean}>`
+const SidebarStyled = styled.nav<{ $collapsed: boolean}>`
   position: relative;
   width: ${(props) => props.theme.sidebarWidth};
   background-color: ${(props) => props.theme.colorBg2};
@@ -98,7 +103,7 @@ const SidebarStyled = styled.nav<{ collapsed: boolean}>`
 
     transition: all 0.3s cubic-bezier(0.53, 0.21, 0, 1);
     transform: ${(props) =>
-      props.collapsed ? "translateX(-107%)" : "translateX(0)"};
+      props.$collapsed ? "translateX(-107%)" : "translateX(0)"};
 
     .toggle-nav {
       display: block !important;
@@ -122,17 +127,21 @@ const SidebarStyled = styled.nav<{ collapsed: boolean}>`
   }
 
   .user-button {
-    .cl-rootBox {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    opacity: 0;
+    border-radius: 1rem;
+    overflow: hidden;
+
+    .cl-rootBox,
+    .cl-userButtonBox,
+    .cl-userButtonTrigger {
       width: 100%;
       height: 100%;
-      .cl-userButtonBox {
-        width: 100%;
-        height: 100%;
-        .cl-userButtonTrigger {
-          width: 100%;
-          height: 100%;
-        }
-      }
     }
   }
 

@@ -1,14 +1,14 @@
 import prisma from "@/app/utils/connect";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = auth();
-    const { id } = params;
+    const { userId } = await auth();
+    const { id } = await params;
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
@@ -29,11 +29,11 @@ export async function DELETE(
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = auth();
-    const { id } = params;
+    const { userId } = await auth();
+    const { id } = await params;
 
     if (!userId) {
       return NextResponse.json({ error: "UNAUTHORIZED", status: 401 });
@@ -62,11 +62,11 @@ export async function PUT(
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = auth();
-    const { id } = params;
+    const { userId } = await auth();
+    const { id } = await params;
 
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized", status: 401 });

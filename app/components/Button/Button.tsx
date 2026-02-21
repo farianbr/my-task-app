@@ -16,6 +16,7 @@ interface Props {
   type?: "submit" | "button" | "reset" | undefined;
   border?: string;
   color?: string;
+  isLoading?: boolean;
 }
 
 function Button({
@@ -30,6 +31,7 @@ function Button({
   type,
   border,
   color,
+  isLoading = false,
 }: Props) {
   const { theme } = useGlobalState();
 
@@ -47,21 +49,45 @@ function Button({
       }}
       theme={theme}
       onClick={click}
+      disabled={isLoading}
+      $isLoading={isLoading}
     >
-      {icon && icon}
-      {name}
+      {isLoading ? (
+        <Spinner />
+      ) : (
+        <>
+          {icon && icon}
+          {name}
+        </>
+      )}
     </ButtonStyled>
   );
 }
 
-const ButtonStyled = styled.button`
+const Spinner = styled.div`
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
+const ButtonStyled = styled.button<{ $isLoading: boolean }>`
   position: relative;
   display: flex;
   align-items: center;
+  justify-content: center;
   color: ${(props) => props.theme.colorGrey2};
   z-index: 5;
-  cursor: pointer;
-
+  cursor: ${(props) => (props.$isLoading ? "not-allowed" : "pointer")};
+  opacity: ${(props) => (props.$isLoading ? 0.7 : 1)};
   transition: all 0.55s ease-in-out;
 
   i {
@@ -71,11 +97,16 @@ const ButtonStyled = styled.button`
     transition: all 0.55s ease-in-out;
   }
 
-  &:hover {
+  &:hover:not(:disabled) {
     color: ${(props) => props.theme.colorGrey0};
     i {
       color: ${(props) => props.theme.colorGrey0};
     }
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
   }
 `;
 
