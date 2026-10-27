@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Nunito } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import Sidebar from "./components/Sidebar/Sidebar";
 import GlobalStyleProvider from "./providers/GlobalStyleProvider";
@@ -8,9 +8,10 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import NextTopLoader from "nextjs-toploader";
 
-const nunito = Nunito({
-  weight: ["400", "500", "600", "700", "800"],
-  subsets: ["latin"],
+const nunito = localFont({
+  src: "./fonts/Nunito-Variable.woff2",
+  weight: "400 800",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
